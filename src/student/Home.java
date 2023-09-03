@@ -1,36 +1,34 @@
 package student;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import java.awt.*;
 
-import java.awt.Font;
-import javax.swing.JTabbedPane;
 import javax.swing.border.LineBorder;
-import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import com.toedter.calendar.JDateChooser;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JTable;
+
+
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+
 import javax.swing.border.BevelBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.SwingConstants;
+
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+
+import javax.swing.*;
+import java.util.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.SimpleDateFormat;
 
 public class Home extends JFrame implements ActionListener{
+	Student student = new Student();
 	private static JFrame frame;
 	private JPanel contentPane;
 	private JTextField textField;
@@ -41,6 +39,11 @@ public class Home extends JFrame implements ActionListener{
 	private JTextField textField_5;
 	private JTextField textField_6;
 	private JTextField textField_7;
+	private JDateChooser dateChooser;
+	private JComboBox comboBox;
+	private JLabel imageLabel;
+	private String imagePath;
+	private JButton browseButton;
 	
 	private Font fillInFont = new Font("Times New Roman", Font.PLAIN, 16);
 	private Font infoLabelFont = new Font ("Times New Roman", Font.BOLD, 16);
@@ -127,7 +130,7 @@ public class Home extends JFrame implements ActionListener{
 		panel.add(panel_1);
 		
 		JLabel lblNewLabel = new JLabel("STUDENT MANAGEMENT");
-		lblNewLabel.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel.setFont(infoLabelFont);
 		lblNewLabel.setBounds(0, 0, 552, 45);
 		panel_1.add(lblNewLabel);
 		
@@ -150,6 +153,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		textField = new JTextField();
 		textField.setFont(fillInFont);
+		textField.setBackground(new Color(204, 204, 204));
 		textField.setBounds(124, 11, 207, 20);
 		panel_3.add(textField);
 		textField.setColumns(10);
@@ -160,11 +164,11 @@ public class Home extends JFrame implements ActionListener{
 		panel_3.add(textField_1);
 		textField_1.setColumns(10);
 		
-		JDateChooser dateChooser = new JDateChooser();
+		dateChooser = new JDateChooser();
 		dateChooser.setBounds(124, 73, 207, 20);
 		panel_3.add(dateChooser);
 		
-		JComboBox comboBox = new JComboBox();
+		comboBox = new JComboBox();
 		comboBox.setFont(fillInFont);
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Male", "Female"}));
 		comboBox.setBounds(124, 104, 207, 20);
@@ -177,6 +181,14 @@ public class Home extends JFrame implements ActionListener{
 		textField_2.setColumns(10);
 		
 		textField_3 = new JTextField();
+		textField_3.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(!Character.isDigit(e.getKeyChar())) {
+					e.consume();
+				}
+			}
+		});
 		textField_3.setFont(fillInFont);
 		textField_3.setBounds(124, 166, 207, 20);
 		panel_3.add(textField_3);
@@ -263,11 +275,13 @@ public class Home extends JFrame implements ActionListener{
 		panel_3.add(panel_5);
 		panel_5.setLayout(null);
 		
-		JButton browseButton = new JButton("Browse");
+		browseButton = new JButton("Browse");
+		
 		browseButton.setFocusable(false);
 		browseButton.setOpaque(true);
 		browseButton.setBackground(new Color(51, 255, 255));
 		browseButton.setFont(new Font("Times New Roman", Font.BOLD, 18));
+		browseButton.addActionListener(this);
 		browseButton.setBounds(10, 53, 95, 42);
 		panel_5.add(browseButton);
 		
@@ -278,12 +292,12 @@ public class Home extends JFrame implements ActionListener{
 		panel_5.add(panel_6);
 		panel_6.setLayout(null);
 		
-		JLabel imageLabel = new JLabel("");
+		imageLabel = new JLabel("");
 		imageLabel.setBounds(0, 0, 204, 84);
 		panel_6.add(imageLabel);
 		
 		JLabel lblNewLabel_12 = new JLabel("Image");
-		lblNewLabel_12.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_12.setFont(infoLabelFont);
 		lblNewLabel_12.setBounds(10, 11, 63, 22);
 		panel_5.add(lblNewLabel_12);
 		
@@ -307,7 +321,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_7.add(lblNewLabel_11);
 		
 		searchField = new JTextField();
-		searchField.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		searchField.setFont(fillInFont);
 		searchField.setBounds(135, 11, 269, 23);
 		panel_7.add(searchField);
 		searchField.setColumns(10);
@@ -340,11 +354,11 @@ public class Home extends JFrame implements ActionListener{
 			new Object[][] {
 			},
 			new String[] {
-				"Student's ID", "Student's Name", "Date of Birth", "Gender", "Email", "Phone Number", "Father's Name", "Mother's Name", "Address Line 1", "Address Line 2"
+				"Student's ID", "Student's Name", "Date of Birth", "Gender", "Email", "Phone Number", "Father's Name", "Mother's Name", "Address Line 1", "Address Line 2", "Image Path"
 			}
 		) {
 			boolean[] columnEditables = new boolean[] {
-				false, false, false, false, false, false, false, false, false, false
+				false, false, false, false, false, false, false, false, false, false, false
 			};
 			public boolean isCellEditable(int row, int column) {
 				return columnEditables[column];
@@ -368,10 +382,29 @@ public class Home extends JFrame implements ActionListener{
 		panel_9.setLayout(null);
 		
 		JButton btnNewButton = new JButton("Add New");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(isEmptyStudent()) {
+					int id = student.getMax();
+					String name = textField_1.getText();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+					String date = dateFormat.format(dateChooser.getDate());
+					String gender = comboBox.getSelectedItem().toString();
+					String email = textField_2.getText();
+					String phone = textField_3.getText();
+					String father = textField_4.getText();
+					String mother = textField_5.getText();
+					String address1 = textField_6.getText();
+					String address2 = textField_7.getText();
+					student.insert(id, name, date, gender, email, phone, father, mother, address1, address2, imagePath);
+					clearStudent();
+				}
+			}
+		});
 		btnNewButton.setOpaque(true);
 		btnNewButton.setFocusable(false);
 		btnNewButton.setBackground(new Color(51, 255, 255));
-		btnNewButton.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton.setFont(infoLabelFont);
 		btnNewButton.setBounds(10, 11, 101, 30);
 		panel_9.add(btnNewButton);
 		
@@ -379,7 +412,7 @@ public class Home extends JFrame implements ActionListener{
 		btnNewButton_1.setOpaque(true);
 		btnNewButton_1.setFocusable(false);
 		btnNewButton_1.setBackground(new Color(51, 255, 255));
-		btnNewButton_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_1.setFont(infoLabelFont);
 		btnNewButton_1.setBounds(115, 11, 95, 30);
 		panel_9.add(btnNewButton_1);
 		
@@ -387,7 +420,7 @@ public class Home extends JFrame implements ActionListener{
 		btnNewButton_2.setOpaque(true);
 		btnNewButton_2.setFocusable(false);
 		btnNewButton_2.setBackground(new Color(51, 255, 255));
-		btnNewButton_2.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_2.setFont(infoLabelFont);
 		btnNewButton_2.setBounds(220, 11, 95, 30);
 		panel_9.add(btnNewButton_2);
 		
@@ -395,15 +428,20 @@ public class Home extends JFrame implements ActionListener{
 		btnNewButton_3.setOpaque(true);
 		btnNewButton_3.setFocusable(false);
 		btnNewButton_3.setBackground(new Color(51, 255, 255));
-		btnNewButton_3.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_3.setFont(infoLabelFont);
 		btnNewButton_3.setBounds(325, 11, 95, 30);
 		panel_9.add(btnNewButton_3);
 		
 		JButton btnNewButton_4 = new JButton("Clear");
+		btnNewButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearStudent();
+			}
+		});
 		btnNewButton_4.setOpaque(true);
 		btnNewButton_4.setFocusable(false);
 		btnNewButton_4.setBackground(new Color(51, 255, 255));
-		btnNewButton_4.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_4.setFont(infoLabelFont);
 		btnNewButton_4.setBounds(430, 11, 95, 30);
 		panel_9.add(btnNewButton_4);
 		
@@ -412,7 +450,7 @@ public class Home extends JFrame implements ActionListener{
 		studentLogoutButton.setOpaque(true);
 		studentLogoutButton.setFocusable(false);
 		studentLogoutButton.setBackground(new Color(51, 255, 255));
-		studentLogoutButton.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		studentLogoutButton.setFont(infoLabelFont);
 		studentLogoutButton.setBounds(535, 11, 95, 30);
 		panel_9.add(studentLogoutButton);
 		
@@ -429,29 +467,29 @@ public class Home extends JFrame implements ActionListener{
 		courseTab.add(panel_3_1);
 		
 		textField_8 = new JTextField();
-		textField_8.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_8.setFont(fillInFont);
 		textField_8.setColumns(10);
 		textField_8.setBounds(124, 137, 207, 20);
 		panel_3_1.add(textField_8);
 		
 		textField_9 = new JTextField();
-		textField_9.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_9.setFont(fillInFont);
 		textField_9.setColumns(10);
 		textField_9.setBounds(124, 168, 207, 20);
 		panel_3_1.add(textField_9);
 		
 		JComboBox comboBox_1 = new JComboBox();
-		comboBox_1.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_1.setFont(fillInFont);
 		comboBox_1.setBounds(124, 199, 207, 20);
 		panel_3_1.add(comboBox_1);
 		
 		JLabel lblNewLabel_1_1 = new JLabel("ID");
-		lblNewLabel_1_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_1_1.setFont(infoLabelFont);
 		lblNewLabel_1_1.setBounds(10, 139, 100, 16);
 		panel_3_1.add(lblNewLabel_1_1);
 		
 		JLabel lblNewLabel_2_1 = new JLabel("Student's ID");
-		lblNewLabel_2_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_2_1.setFont(infoLabelFont);
 		lblNewLabel_2_1.setBounds(10, 170, 107, 16);
 		panel_3_1.add(lblNewLabel_2_1);
 		
@@ -463,7 +501,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_3_1.add(panel_5_1);
 		
 		JLabel lblNewLabel_19 = new JLabel("Student's ID");
-		lblNewLabel_19.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_19.setFont(fillInFont);
 		lblNewLabel_19.setBounds(10, 11, 94, 28);
 		panel_5_1.add(lblNewLabel_19);
 		
@@ -481,62 +519,62 @@ public class Home extends JFrame implements ActionListener{
 		panel_5_1.add(btnNewButton_9);
 		
 		JComboBox comboBox_4 = new JComboBox();
-		comboBox_4.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_4.setFont(fillInFont);
 		comboBox_4.setModel(new DefaultComboBoxModel(new String[] {"C Programming", "C++ Programming", "Advanced Mathematics II", "Data Structures & Algorithms", "Python Java", "Comprehensive Practice 1", "Engineering Mathematics"}));
 		comboBox_4.setBounds(124, 229, 207, 20);
 		panel_3_1.add(comboBox_4);
 		
 		JComboBox comboBox_5 = new JComboBox();
 		comboBox_5.setModel(new DefaultComboBoxModel(new String[] {"Principle of computer component", "Report Writing", "Web Programming", "Java OOP", "Design User Interface", "JSP", "Software Testing and Inspection", "Mobile App Development", ""}));
-		comboBox_5.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_5.setFont(fillInFont);
 		comboBox_5.setBounds(124, 260, 207, 20);
 		panel_3_1.add(comboBox_5);
 		
 		JComboBox comboBox_6 = new JComboBox();
 		comboBox_6.setModel(new DefaultComboBoxModel(new String[] {"Advanced Mathematics I", "Database", "Software Testing", "Linux", "Data Science", "Big Data I", "Big Data II", "Comprehensive Practice II"}));
-		comboBox_6.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_6.setFont(fillInFont);
 		comboBox_6.setBounds(124, 291, 207, 20);
 		panel_3_1.add(comboBox_6);
 		
 		JComboBox comboBox_7 = new JComboBox();
 		comboBox_7.setModel(new DefaultComboBoxModel(new String[] {"Chinese Traditional Culture", "Computer Network", "Overview of China", "Principle of Operating System", "Computer Science", "Artificial Intelligence I", "HSK 3", "Digital Image Processing"}));
-		comboBox_7.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_7.setFont(fillInFont);
 		comboBox_7.setBounds(124, 322, 207, 20);
 		panel_3_1.add(comboBox_7);
 		
 		JComboBox comboBox_8 = new JComboBox();
 		comboBox_8.setModel(new DefaultComboBoxModel(new String[] {"Cloud Computing", "Algorithms Analysis and Design", "machine Learning ", "Deep Learning", "HSK Test Tutoring", "IT Project Management", "Artificial Intelligence II", "Graduation Thesis"}));
-		comboBox_8.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		comboBox_8.setFont(fillInFont);
 		comboBox_8.setBounds(124, 353, 207, 20);
 		panel_3_1.add(comboBox_8);
 		
 		JLabel lblNewLabel_13 = new JLabel("Semester");
-		lblNewLabel_13.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_13.setFont(infoLabelFont);
 		lblNewLabel_13.setBounds(10, 203, 100, 16);
 		panel_3_1.add(lblNewLabel_13);
 		
 		JLabel lblNewLabel_14 = new JLabel("Course 1");
-		lblNewLabel_14.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_14.setFont(infoLabelFont);
 		lblNewLabel_14.setBounds(10, 232, 107, 17);
 		panel_3_1.add(lblNewLabel_14);
 		
 		JLabel lblNewLabel_15 = new JLabel("Course 2");
-		lblNewLabel_15.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_15.setFont(infoLabelFont);
 		lblNewLabel_15.setBounds(10, 260, 115, 17);
 		panel_3_1.add(lblNewLabel_15);
 		
 		JLabel lblNewLabel_16 = new JLabel("Course 3");
-		lblNewLabel_16.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_16.setFont(infoLabelFont);
 		lblNewLabel_16.setBounds(10, 294, 100, 16);
 		panel_3_1.add(lblNewLabel_16);
 		
 		JLabel lblNewLabel_17 = new JLabel("Course 4");
-		lblNewLabel_17.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_17.setFont(infoLabelFont);
 		lblNewLabel_17.setBounds(10, 325, 100, 17);
 		panel_3_1.add(lblNewLabel_17);
 		
 		JLabel lblNewLabel_18 = new JLabel("Course 5");
-		lblNewLabel_18.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_18.setFont(infoLabelFont);
 		lblNewLabel_18.setBounds(10, 355, 110, 17);
 		panel_3_1.add(lblNewLabel_18);
 		
@@ -560,7 +598,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_7_1.add(lblNewLabel_11_1);
 		
 		textField_16 = new JTextField();
-		textField_16.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_16.setFont(fillInFont);
 		textField_16.setColumns(10);
 		textField_16.setBounds(135, 11, 269, 23);
 		panel_7_1.add(textField_16);
@@ -610,7 +648,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_6 = new JButton("Save");
 		btnNewButton_6.setOpaque(true);
-		btnNewButton_6.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_6.setFont(infoLabelFont);
 		btnNewButton_6.setFocusable(false);
 		btnNewButton_6.setBackground(new Color(51, 255, 255));
 		btnNewButton_6.setBounds(10, 11, 101, 30);
@@ -618,7 +656,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_3_1 = new JButton("Print");
 		btnNewButton_3_1.setOpaque(true);
-		btnNewButton_3_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_3_1.setFont(infoLabelFont);
 		btnNewButton_3_1.setFocusable(false);
 		btnNewButton_3_1.setBackground(new Color(51, 255, 255));
 		btnNewButton_3_1.setBounds(121, 11, 95, 30);
@@ -626,7 +664,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_4_1 = new JButton("Clear");
 		btnNewButton_4_1.setOpaque(true);
-		btnNewButton_4_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_4_1.setFont(infoLabelFont);
 		btnNewButton_4_1.setFocusable(false);
 		btnNewButton_4_1.setBackground(new Color(51, 255, 255));
 		btnNewButton_4_1.setBounds(226, 11, 95, 30);
@@ -635,7 +673,7 @@ public class Home extends JFrame implements ActionListener{
 		courseLogoutButton = new JButton("Logout");
 		courseLogoutButton.addActionListener(this);
 		courseLogoutButton.setOpaque(true);
-		courseLogoutButton.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		courseLogoutButton.setFont(infoLabelFont);
 		courseLogoutButton.setFocusable(false);
 		courseLogoutButton.setBackground(new Color(51, 255, 255));
 		courseLogoutButton.setBounds(331, 11, 95, 30);
@@ -661,24 +699,24 @@ public class Home extends JFrame implements ActionListener{
 		panel_3_2.add(panel_3_1_1);
 		
 		textField_11 = new JTextField();
-		textField_11.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_11.setFont(fillInFont);
 		textField_11.setColumns(10);
 		textField_11.setBounds(124, 183, 207, 20);
 		panel_3_1_1.add(textField_11);
 		
 		textField_12 = new JTextField();
-		textField_12.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_12.setFont(fillInFont);
 		textField_12.setColumns(10);
 		textField_12.setBounds(124, 214, 207, 20);
 		panel_3_1_1.add(textField_12);
 		
 		JLabel lblNewLabel_1_1_1 = new JLabel("ID");
-		lblNewLabel_1_1_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_1_1_1.setFont(infoLabelFont);
 		lblNewLabel_1_1_1.setBounds(10, 185, 100, 16);
 		panel_3_1_1.add(lblNewLabel_1_1_1);
 		
 		JLabel lblNewLabel_2_1_1 = new JLabel("Student's ID");
-		lblNewLabel_2_1_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_2_1_1.setFont(infoLabelFont);
 		lblNewLabel_2_1_1.setBounds(10, 216, 107, 16);
 		panel_3_1_1.add(lblNewLabel_2_1_1);
 		
@@ -690,7 +728,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_3_1_1.add(panel_5_1_1);
 		
 		JLabel lblNewLabel_19_1 = new JLabel("Student's ID");
-		lblNewLabel_19_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_19_1.setFont(infoLabelFont);
 		lblNewLabel_19_1.setBounds(10, 11, 94, 28);
 		panel_5_1_1.add(lblNewLabel_19_1);
 		
@@ -708,7 +746,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_5_1_1.add(btnNewButton_9_1);
 		
 		JLabel lblNewLabel_20 = new JLabel("Semester");
-		lblNewLabel_20.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_20.setFont(infoLabelFont);
 		lblNewLabel_20.setBounds(10, 85, 94, 28);
 		panel_5_1_1.add(lblNewLabel_20);
 		
@@ -719,37 +757,37 @@ public class Home extends JFrame implements ActionListener{
 		textField_14.setColumns(10);
 		
 		JLabel lblNewLabel_13_1 = new JLabel("Semester");
-		lblNewLabel_13_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_13_1.setFont(infoLabelFont);
 		lblNewLabel_13_1.setBounds(10, 249, 100, 16);
 		panel_3_1_1.add(lblNewLabel_13_1);
 		
 		JLabel lblNewLabel_14_1 = new JLabel("Course 1");
-		lblNewLabel_14_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_14_1.setFont(infoLabelFont);
 		lblNewLabel_14_1.setBounds(10, 278, 107, 17);
 		panel_3_1_1.add(lblNewLabel_14_1);
 		
 		JLabel lblNewLabel_15_1 = new JLabel("Course 2");
-		lblNewLabel_15_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_15_1.setFont(infoLabelFont);
 		lblNewLabel_15_1.setBounds(10, 306, 115, 17);
 		panel_3_1_1.add(lblNewLabel_15_1);
 		
 		JLabel lblNewLabel_16_1 = new JLabel("Course 3");
-		lblNewLabel_16_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_16_1.setFont(infoLabelFont);
 		lblNewLabel_16_1.setBounds(10, 334, 100, 16);
 		panel_3_1_1.add(lblNewLabel_16_1);
 		
 		JLabel lblNewLabel_17_1 = new JLabel("Course 4");
-		lblNewLabel_17_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_17_1.setFont(infoLabelFont);
 		lblNewLabel_17_1.setBounds(10, 357, 100, 17);
 		panel_3_1_1.add(lblNewLabel_17_1);
 		
 		JLabel lblNewLabel_18_1 = new JLabel("Course 5");
-		lblNewLabel_18_1.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_18_1.setFont(infoLabelFont);
 		lblNewLabel_18_1.setBounds(10, 385, 110, 17);
 		panel_3_1_1.add(lblNewLabel_18_1);
 		
 		textField_15 = new JTextField();
-		textField_15.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_15.setFont(fillInFont);
 		textField_15.setBounds(124, 247, 137, 20);
 		panel_3_1_1.add(textField_15);
 		textField_15.setColumns(10);
@@ -757,13 +795,13 @@ public class Home extends JFrame implements ActionListener{
 		textField_17 = new JTextField();
 		textField_17.setText("0.0");
 		textField_17.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_17.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_17.setFont(fillInFont);
 		textField_17.setBounds(271, 247, 60, 20);
 		panel_3_1_1.add(textField_17);
 		textField_17.setColumns(10);
 		
 		textField_18 = new JTextField();
-		textField_18.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_18.setFont(fillInFont);
 		textField_18.setBounds(124, 277, 137, 18);
 		panel_3_1_1.add(textField_18);
 		textField_18.setColumns(10);
@@ -771,13 +809,13 @@ public class Home extends JFrame implements ActionListener{
 		textField_19 = new JTextField();
 		textField_19.setText("0.0");
 		textField_19.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_19.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_19.setFont(fillInFont);
 		textField_19.setBounds(271, 277, 60, 18);
 		panel_3_1_1.add(textField_19);
 		textField_19.setColumns(10);
 		
 		textField_20 = new JTextField();
-		textField_20.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_20.setFont(fillInFont);
 		textField_20.setBounds(123, 305, 138, 18);
 		panel_3_1_1.add(textField_20);
 		textField_20.setColumns(10);
@@ -785,13 +823,13 @@ public class Home extends JFrame implements ActionListener{
 		textField_21 = new JTextField();
 		textField_21.setText("0.0");
 		textField_21.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_21.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_21.setFont(fillInFont);
 		textField_21.setBounds(271, 305, 60, 16);
 		panel_3_1_1.add(textField_21);
 		textField_21.setColumns(10);
 		
 		textField_22 = new JTextField();
-		textField_22.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_22.setFont(fillInFont);
 		textField_22.setBounds(122, 334, 139, 17);
 		panel_3_1_1.add(textField_22);
 		textField_22.setColumns(10);
@@ -799,13 +837,13 @@ public class Home extends JFrame implements ActionListener{
 		textField_23 = new JTextField();
 		textField_23.setText("0.0");
 		textField_23.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_23.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_23.setFont(fillInFont);
 		textField_23.setBounds(271, 333, 60, 17);
 		panel_3_1_1.add(textField_23);
 		textField_23.setColumns(10);
 		
 		textField_24 = new JTextField();
-		textField_24.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_24.setFont(fillInFont);
 		textField_24.setBounds(124, 357, 137, 16);
 		panel_3_1_1.add(textField_24);
 		textField_24.setColumns(10);
@@ -813,13 +851,13 @@ public class Home extends JFrame implements ActionListener{
 		textField_35 = new JTextField();
 		textField_35.setText("0.0");
 		textField_35.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_35.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_35.setFont(fillInFont);
 		textField_35.setBounds(271, 356, 60, 17);
 		panel_3_1_1.add(textField_35);
 		textField_35.setColumns(10);
 		
 		textField_36 = new JTextField();
-		textField_36.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_36.setFont(fillInFont);
 		textField_36.setBounds(124, 384, 137, 18);
 		panel_3_1_1.add(textField_36);
 		textField_36.setColumns(10);
@@ -827,7 +865,7 @@ public class Home extends JFrame implements ActionListener{
 		textField_37 = new JTextField();
 		textField_37.setText("0.0");
 		textField_37.setHorizontalAlignment(SwingConstants.CENTER);
-		textField_37.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_37.setFont(fillInFont);
 		textField_37.setBounds(271, 384, 60, 18);
 		panel_3_1_1.add(textField_37);
 		textField_37.setColumns(10);
@@ -852,7 +890,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_7_2.add(lblNewLabel_11_2);
 		
 		textField_25 = new JTextField();
-		textField_25.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+		textField_25.setFont(fillInFont);
 		textField_25.setColumns(10);
 		textField_25.setBounds(135, 11, 269, 23);
 		panel_7_2.add(textField_25);
@@ -902,7 +940,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_7 = new JButton("Save");
 		btnNewButton_7.setOpaque(true);
-		btnNewButton_7.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_7.setFont(infoLabelFont);
 		btnNewButton_7.setFocusable(false);
 		btnNewButton_7.setBackground(new Color(51, 255, 255));
 		btnNewButton_7.setBounds(10, 11, 101, 30);
@@ -910,7 +948,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_1_2 = new JButton("Update");
 		btnNewButton_1_2.setOpaque(true);
-		btnNewButton_1_2.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_1_2.setFont(infoLabelFont);
 		btnNewButton_1_2.setFocusable(false);
 		btnNewButton_1_2.setBackground(new Color(51, 255, 255));
 		btnNewButton_1_2.setBounds(115, 11, 95, 30);
@@ -918,7 +956,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_3_2 = new JButton("Print");
 		btnNewButton_3_2.setOpaque(true);
-		btnNewButton_3_2.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_3_2.setFont(infoLabelFont);
 		btnNewButton_3_2.setFocusable(false);
 		btnNewButton_3_2.setBackground(new Color(51, 255, 255));
 		btnNewButton_3_2.setBounds(215, 11, 95, 30);
@@ -930,7 +968,7 @@ public class Home extends JFrame implements ActionListener{
 			}
 		});
 		btnNewButton_4_2.setOpaque(true);
-		btnNewButton_4_2.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_4_2.setFont(infoLabelFont);
 		btnNewButton_4_2.setFocusable(false);
 		btnNewButton_4_2.setBackground(new Color(51, 255, 255));
 		btnNewButton_4_2.setBounds(315, 11, 95, 30);
@@ -939,7 +977,7 @@ public class Home extends JFrame implements ActionListener{
 		scoreLogoutButton = new JButton("Logout");
 		scoreLogoutButton.addActionListener(this);
 		scoreLogoutButton.setOpaque(true);
-		scoreLogoutButton.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		scoreLogoutButton.setFont(infoLabelFont);
 		scoreLogoutButton.setFocusable(false);
 		scoreLogoutButton.setBackground(new Color(51, 255, 255));
 		scoreLogoutButton.setBounds(418, 11, 95, 30);
@@ -965,7 +1003,7 @@ public class Home extends JFrame implements ActionListener{
 		panel_3_3.add(panel_5_1_2);
 		
 		JLabel lblNewLabel_19_2 = new JLabel("Student's ID");
-		lblNewLabel_19_2.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblNewLabel_19_2.setFont(infoLabelFont);
 		lblNewLabel_19_2.setBounds(10, 11, 94, 28);
 		panel_5_1_2.add(lblNewLabel_19_2);
 		
@@ -1033,7 +1071,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_3_3 = new JButton("Print");
 		btnNewButton_3_3.setOpaque(true);
-		btnNewButton_3_3.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_3_3.setFont(infoLabelFont);
 		btnNewButton_3_3.setFocusable(false);
 		btnNewButton_3_3.setBackground(new Color(51, 255, 255));
 		btnNewButton_3_3.setBounds(10, 11, 95, 30);
@@ -1041,7 +1079,7 @@ public class Home extends JFrame implements ActionListener{
 		
 		JButton btnNewButton_4_3 = new JButton("Clear");
 		btnNewButton_4_3.setOpaque(true);
-		btnNewButton_4_3.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		btnNewButton_4_3.setFont(infoLabelFont);
 		btnNewButton_4_3.setFocusable(false);
 		btnNewButton_4_3.setBackground(new Color(51, 255, 255));
 		btnNewButton_4_3.setBounds(115, 11, 95, 30);
@@ -1050,7 +1088,7 @@ public class Home extends JFrame implements ActionListener{
 		marksLogoutButton= new JButton("Logout");
 		marksLogoutButton.addActionListener(this);
 		marksLogoutButton.setOpaque(true);
-		marksLogoutButton.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		marksLogoutButton.setFont(infoLabelFont);
 		marksLogoutButton.setFocusable(false);
 		marksLogoutButton.setBackground(new Color(51, 255, 255));
 		marksLogoutButton.setBounds(220, 11, 95, 30);
@@ -1070,10 +1108,28 @@ public class Home extends JFrame implements ActionListener{
 			}
 		}
 		
+		if(e.getSource()==browseButton) {
+			JFileChooser fileChooser  = new JFileChooser();
+			fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("*.image", "jpg", "gif", "png");
+			fileChooser.addChoosableFileFilter(filter);
+			int output = fileChooser.showSaveDialog(fileChooser);
+			if(output==JFileChooser.APPROVE_OPTION) {
+				File selectedFile = fileChooser.getSelectedFile();
+				String path = selectedFile.getAbsolutePath();
+				imageLabel.setIcon(imageAdjust(path, null));
+				imagePath = path;
+			}
+			else {
+				JOptionPane.showMessageDialog(this, "No image selected");
+			}
+		}
+		
 	}
 	
 	public void init() {
 		tableViewStudent();
+		textField.setText(String.valueOf(student.getMax()));
 	}
 	
 	private void tableViewStudent() {
@@ -1082,6 +1138,88 @@ public class Home extends JFrame implements ActionListener{
 		table.setShowGrid(true);
 		table.setGridColor(Color.black);
 		table.setBackground(Color.white);
+	}
+	
+	private void clearStudent() {
+		textField.setText(String.valueOf(student.getMax()));
+		textField_1.setText(null);
+		textField_2.setText(null);
+		textField_3.setText(null);
+		textField_4.setText(null);
+		textField_5.setText(null);
+		textField_6.setText(null);
+		textField_7.setText(null);
+		dateChooser.setDate(null);
+		comboBox.setSelectedIndex(0);
+		imageLabel.setIcon(null);
+		table.clearSelection();
+		imagePath = null;
+	}
+	
+	public boolean isEmptyStudent() {
+		if(textField_1.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Student name is missing");
+			return false;
+		}
+		if(dateChooser.getDate() == null) {
+			JOptionPane.showMessageDialog(this, "Student's date of birth is missing");
+			return false;
+		}
+		if(dateChooser.getDate().compareTo(new Date()) > 0) {
+			JOptionPane.showMessageDialog(this, "No student from the future is allowed");
+			return false;
+		}
+		if(textField_2.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Student email is missing");
+			return false;
+		}
+		if(!textField_2.getText().matches("^.+@.+\\..+$")) {
+			JOptionPane.showMessageDialog(this, "Invalid email address");
+			return false;
+		}
+		if(textField_3.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Student phone number is missing");
+			return false;
+		}
+		if(textField_3.getText().length() >= 15) {
+			JOptionPane.showMessageDialog(this, "Phone number is too long");
+			return false;
+		}
+		if(textField_4.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Father's name is missing");
+			return false;
+		}
+		if(textField_5.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Mother's name is missing");
+			return false;
+		}
+		if(textField_6.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Address Line 1 is missing");
+			return false;
+		}
+		if(textField_7.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Address Line 2 is missing");
+			return false;
+		}
+		if(imagePath == null) {
+			JOptionPane.showMessageDialog(this, "No image selected");
+			return false;
+		}
+		return true;
+	}
+	
+	private ImageIcon imageAdjust(String path, byte[] pic) {
+		ImageIcon myImage = null;
+		if(path != null) {
+			myImage = new ImageIcon(path);
+		}
+		else {
+			myImage = new ImageIcon(pic);
+		}
+		Image img = myImage.getImage();
+		Image newImage = img.getScaledInstance(imageLabel.getWidth(), imageLabel.getHeight(), Image.SCALE_SMOOTH);
+		ImageIcon icon = new ImageIcon(newImage);
+		return icon;
 	}
 	
 }
