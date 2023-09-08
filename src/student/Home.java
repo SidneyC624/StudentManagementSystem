@@ -2,29 +2,17 @@ package student;
 
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-
+import java.awt.event.*;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import com.toedter.calendar.JDateChooser;
-
-
 import javax.swing.table.DefaultTableModel;
-
 import javax.swing.border.BevelBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import java.awt.Dialog.ModalExclusionType;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
-
 import javax.swing.*;
 import java.util.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class Home extends JFrame implements ActionListener{
@@ -44,6 +32,7 @@ public class Home extends JFrame implements ActionListener{
 	private JLabel imageLabel;
 	private String imagePath;
 	private JButton browseButton;
+	private JButton addNewButton;
 	
 	private Font fillInFont = new Font("Times New Roman", Font.PLAIN, 16);
 	private Font infoLabelFont = new Font ("Times New Roman", Font.BOLD, 16);
@@ -81,6 +70,7 @@ public class Home extends JFrame implements ActionListener{
 	private JButton marksLogoutButton;
 	
 	private DefaultTableModel model;
+	private int rowIndex;
 
 	public static void main(String[] args) {
 		frame = new Home();
@@ -350,6 +340,38 @@ public class Home extends JFrame implements ActionListener{
 		
 		
 		table = new JTable();
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				model = (DefaultTableModel) table.getModel();
+				rowIndex = table.getSelectedRow();
+				textField.setText(model.getValueAt(rowIndex, 0).toString());
+				textField_1.setText(model.getValueAt(rowIndex, 1).toString());
+				try {
+					Date date = new SimpleDateFormat("yyyy-MM-dd").parse(model.getValueAt(rowIndex, 2).toString());
+					dateChooser.setDate(date);
+				} catch (ParseException e1) {
+					e1.printStackTrace();
+				}
+				String gender = model.getValueAt(rowIndex, 3).toString();
+				if(gender.equals("Male")) {
+					comboBox.setSelectedIndex(0);
+				}
+				else {
+					comboBox.setSelectedIndex(1);
+				}
+				textField_2.setText(model.getValueAt(rowIndex, 4).toString());
+				textField_3.setText(model.getValueAt(rowIndex, 5).toString());
+				textField_4.setText(model.getValueAt(rowIndex, 6).toString());
+				textField_5.setText(model.getValueAt(rowIndex, 7).toString());
+				textField_6.setText(model.getValueAt(rowIndex, 8).toString());
+				textField_7.setText(model.getValueAt(rowIndex, 9).toString());
+				String path = model.getValueAt(rowIndex, 10).toString();
+				imagePath = path;
+				imageLabel.setIcon(imageAdjust(imagePath, null)); //get image path, call image adjust method and convert it into icon
+				
+			}
+		});
 		table.setModel(new DefaultTableModel(
 			new Object[][] {
 			},
@@ -381,32 +403,14 @@ public class Home extends JFrame implements ActionListener{
 		panel_4.add(panel_9);
 		panel_9.setLayout(null);
 		
-		JButton btnNewButton = new JButton("Add New");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(isEmptyStudent()) {
-					int id = student.getMax();
-					String name = textField_1.getText();
-					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-					String date = dateFormat.format(dateChooser.getDate());
-					String gender = comboBox.getSelectedItem().toString();
-					String email = textField_2.getText();
-					String phone = textField_3.getText();
-					String father = textField_4.getText();
-					String mother = textField_5.getText();
-					String address1 = textField_6.getText();
-					String address2 = textField_7.getText();
-					student.insert(id, name, date, gender, email, phone, father, mother, address1, address2, imagePath);
-					clearStudent();
-				}
-			}
-		});
-		btnNewButton.setOpaque(true);
-		btnNewButton.setFocusable(false);
-		btnNewButton.setBackground(new Color(51, 255, 255));
-		btnNewButton.setFont(infoLabelFont);
-		btnNewButton.setBounds(10, 11, 101, 30);
-		panel_9.add(btnNewButton);
+		addNewButton = new JButton("Add New");
+		addNewButton.addActionListener(this);
+		addNewButton.setOpaque(true);
+		addNewButton.setFocusable(false);
+		addNewButton.setBackground(new Color(51, 255, 255));
+		addNewButton.setFont(infoLabelFont);
+		addNewButton.setBounds(10, 11, 101, 30);
+		panel_9.add(addNewButton);
 		
 		JButton btnNewButton_1 = new JButton("Update");
 		btnNewButton_1.setOpaque(true);
@@ -1125,6 +1129,36 @@ public class Home extends JFrame implements ActionListener{
 			}
 		}
 		
+		if(e.getSource()==addNewButton) {
+			if(isEmptyStudent()) {
+				if(!student.isEmailExist(textField_2.getText())) {
+					if(!student.isPhoneExist(textField_3.getText())) {
+						int id = student.getMax();
+						String name = textField_1.getText();
+						SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+						String date = dateFormat.format(dateChooser.getDate());
+						String gender = comboBox.getSelectedItem().toString();
+						String email = textField_2.getText();
+						String phone = textField_3.getText();
+						String father = textField_4.getText();
+						String mother = textField_5.getText();
+						String address1 = textField_6.getText();
+						String address2 = textField_7.getText();
+						student.insert(id, name, date, gender, email, phone, father, mother, address1, address2, imagePath);
+						table.setModel(new DefaultTableModel(null, new Object[]{"Student's ID", "Student's name", "Date of Birth", "Gender", 
+                                "Email", "Phone Number", "Father's Name", "Mother's Name", "Address Line 1", "Address Line 2", "Image Path"}));
+						student.getStudentValue(table, "");
+						clearStudent();
+					}
+					else {
+						JOptionPane.showMessageDialog(this, "This phone nunber already exists");
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(this, "This email already exists");
+				}
+			}
+		}
 	}
 	
 	public void init() {
@@ -1133,6 +1167,7 @@ public class Home extends JFrame implements ActionListener{
 	}
 	
 	private void tableViewStudent() {
+		student.getStudentValue(table, "");
 		model = (DefaultTableModel) table.getModel();
 		table.setRowHeight(30);
 		table.setShowGrid(true);
@@ -1156,6 +1191,7 @@ public class Home extends JFrame implements ActionListener{
 		imagePath = null;
 	}
 	
+	//checks if the input is valid
 	public boolean isEmptyStudent() {
 		if(textField_1.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Student name is missing");
